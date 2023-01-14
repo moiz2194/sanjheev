@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const Category=require('../model/category.js')
 const Product=require('../model/product.js')
 const Order=require('../model/order.js')
-
+const cloudinary=require('cloudinary')
 const { verifyToken, isadmin } = require('../middlewares/verifyauth');
 
 //Add category
@@ -26,11 +26,24 @@ res.status(200).send({success:true,category})
 }))
 //Delete product
 router.post('/deleteproduct',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
+
 const category=await Category.findByIdAndDelete(req.body.id)
 res.status(200).send({success:true,category})
 }))
 //Add product
 router.post('/addproduct',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
+    const Images=[]
+    if(req.body.images.length!==0){
+        for (const element of req.body.image) {
+            let result=await cloudinary.v2.uploader.upload(element,{
+                folder:'products'
+            })
+            Images.push({public_id:result.public_id,url:result.url})
+        }
+        
+    }
+   
+req.body.Images=Images
 const product=await Product.create(req.body)
 res.status(200).send({success:true,product})
 }))
