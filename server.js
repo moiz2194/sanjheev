@@ -1,5 +1,5 @@
 const app=require('./app.js')
-const port=process.env.port ||5000;
+const port=process.env.port ||5001;
 // Handling Uncaught Exception
 process.on("uncaughtException", (err) => {
     console.log(`Error: ${err.message}`);

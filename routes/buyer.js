@@ -8,7 +8,7 @@ const User=require('../model/user.js')
 const { verifyToken } = require('../middlewares/verifyauth');
 const Apifeature=require('../utilis/apifeature.js')
 const Category=require('../model/category.js')
-const Order=require('../model/order.js')
+const Order=require('../model/Order.js')
 
 //
 

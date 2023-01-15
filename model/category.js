@@ -4,8 +4,21 @@ const userSchema=new mongoose.Schema({
     name:{
         type:String,
         required:true,
-        unique:[true,'Your number is already taken']
+        unique:[true,'name is already taken']
 
+    },
+    url:{ 
+        type:String,
+        required:true
+
+    },
+    public_id:{
+        type:String,
+        required:true
+    },
+    total_subcategories:{
+        type:Number,
+        default:0
     },
     Parent_id:{
         type:String,

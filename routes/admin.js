@@ -5,24 +5,69 @@ const ErrorHandler = require('../middlewares/errorhandler');
 const jwt = require('jsonwebtoken');
 const Category=require('../model/category.js')
 const Product=require('../model/product.js')
-const Order=require('../model/order.js')
+const Order=require('../model/Order.js')
+const User=require('../model/user.js')
 const cloudinary=require('cloudinary')
 const { verifyToken, isadmin } = require('../middlewares/verifyauth');
 
 //Add category
 router.post('/addcategory',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
+    const result=await cloudinary.v2.uploader.upload(req.body.image,{
+        folder:"categories"
+    })
+    if(req.body.Parent_id){
+const parentcategory=await Category.findById(req.body.Parent_id)
+let total_subcategories=parentcategory.total_subcategories+1
+    await Category.findByIdAndUpdate(parentcategory._id,{
+        total_subcategories
+    })
+    }
+    req.body.public_id=result.public_id
+    req.body.url=result.url
 const category=await Category.create(req.body)
 res.status(200).send({success:true,category})
 }))
 //update category
 router.post('/updatecategory',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
-const category=await Category.findByIdAndUpdate(req.body.id,{
-    name:req.body.name,
-    Parent_id:req.body.Parent_id,
-    url:req.body.url
+    let category;
+    if(req.body.image){
+        const result=await cloudinary.v2.uploader.upload(req.body.image,{
+            folder:'products'
+        })
+ category=await Category.findByIdAndUpdate(req.body.id,{
+    ...req.body,public_id:result.public_id,url:result.url
+ })
+     
 
-})
+    }else{
+ category=await Category.findByIdAndUpdate(req.body.id,req.body)
+    }
 res.status(200).send({success:true,category})
+}))
+//update category
+router.post('/updateproduct',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
+let product;
+let Images=[]
+    if(req.body.images){
+        
+        for (const element of req.body.images) {
+            const result=await cloudinary.v2.uploader.upload(element,{
+                folder:'products'
+            })
+            Images.push({public_id:result.public_id,url:result.url})
+            
+        }
+       
+ product=await Product.findByIdAndUpdate(req.body.id,{
+    ...req.body,Images
+ })
+     
+
+    }else{
+ product=await Product.findByIdAndUpdate(req.body.id,req.body)
+ 
+    }
+res.status(200).send({success:true,product})
 }))
 //Delete product
 router.post('/deleteproduct',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
@@ -54,9 +99,14 @@ router.get('/orders',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
     res.status(200).send({success:true,order})
     }))
 //Mark order complete
-router.get('/completeorder',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
+router.post('/completeorder',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
     const order=await Order.findByIdAndDelete(req.body.id)
 
     res.status(200).send({success:true,order})
+    }))
+router.post('/getalluser',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
+    const users=await User.find()
+
+    res.status(200).send({success:true,users})
     }))
 module.exports=router
