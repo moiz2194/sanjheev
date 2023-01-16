@@ -79,7 +79,7 @@ res.status(200).send({success:true,category})
 router.post('/addproduct',verifyToken,isadmin,asyncerror(async(req,res,next)=>{
     const Images=[]
     if(req.body.images.length!==0){
-        for (const element of req.body.image) {
+        for (const element of req.body.images) {
             let result=await cloudinary.v2.uploader.upload(element,{
                 folder:'products'
             })
